@@ -1,80 +1,141 @@
+import numpy as np
+import os
 import torch
+import sys
+import cv2
+import torch.nn as nn
+import segmentation_models_pytorch as smp
 from torchvision import transforms
 from PIL import Image
-import os
-import segmentation_models_pytorch as smp
-from segmentation_models_pytorch.losses import DiceLoss
-import torch.nn as nn
-import numpy as np
-from tqdm import tqdm
-from torchvision.transforms import ToPILImage
-
-model_path = "road_scene_ImgSeg_model.pt"
-input_images_folder = "Mapillary-Vistas-1000-sidewalks/testing/images"
-output_masks_folder = "Mapillary-Output"
-os.makedirs(output_masks_folder, exist_ok=True)
-
-transform = transforms.Compose([
-    transforms.ToTensor(),
-])
 
 
 class SegmentationModel(nn.Module):
-    def __init__(self):
-        super(SegmentationModel, self).__init__()
+  def __init__(self):
+    super(SegmentationModel, self).__init__()
+    self.layer = smp.DeepLabV3Plus(
+        encoder_name = 'resnet34',
+        encoder_weights="imagenet",
+        in_channels= 3,
+        classes=20,
+        activation=None
+    )
+    self.activation = nn.Sigmoid()
+  def forward(self,x):
+    return self.layer(x)
 
-        self.arc = smp.DeepLabV3Plus(
-            encoder_name='resnet34',
-            in_channels=3,
-            classes=1,
-            activation=None
-        )
-        self.activation = nn.Sigmoid()
+colors = [   [  0,   0,   0],
+        [128, 64, 128],
+        [244, 35, 232],
+        [70, 70, 70],
+        [102, 102, 156],
+        [190, 153, 153],
+        [153, 153, 153],
+        [250, 170, 30],
+        [220, 220, 0],
+        [107, 142, 35],
+        [152, 251, 152],
+        [0, 130, 180],
+        [220, 20, 60],
+        [255, 0, 0],
+        [0, 0, 142],
+        [0, 0, 70],
+        [0, 60, 100],
+        [0, 80, 100],
+        [0, 0, 230],
+        [119, 11, 32],
+    ]
 
-    def forward(self, images, masks=None):
-        logits = self.arc(images)
-
-        if masks is not None:
-            loss1 = DiceLoss(mode='binary')(logits, masks)
-            loss2 = nn.BCEWithLogitsLoss()(logits, masks)
-            return logits, loss1 + loss2
-        return self.activation(logits)
+label_colors = dict(zip(range(20), colors))
 
 
-# Load the model
-model = SegmentationModel()
-model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-model.eval()
+def decode_segmap(segmentation_map):
+    rgb = np.zeros((segmentation_map.shape[0], segmentation_map.shape[1], 3), dtype=np.uint8)
+    for label, color in label_colors.items():
+        rgb[segmentation_map == label] = color
+    return rgb / 255.0
 
-# Iterate through input images
-for image_name in tqdm(os.listdir(input_images_folder), desc="Inferencing", unit="image"):
-    image_path = os.path.join(input_images_folder, image_name)
-    input_image = Image.open(image_path).convert("RGB")
+def create_binary_mask(img, rgb_value):
+    mask = np.all(img == np.array(rgb_value).reshape(1, 1, 3), axis=2).astype(np.uint8) * 255
+    return mask
 
-    try:
-        # Check if the image dimensions are divisible by 16
-        if input_image.size[0] % 16 != 0 or input_image.size[1] % 16 != 0:
-            raise RuntimeError(f"Image {image_name} dimensions not divisible by 16. Skipping.")
+def create_ground_truth_binary_mask(labels, rgb_value):
+    for filename in os.listdir(labels):
+        if filename.endswith(".jpg") or filename.endswith(".png"):
+            image_path = os.path.join(labels, filename)
+            image = cv2.imread(image_path)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        input_tensor = transform(input_image).unsqueeze(0)
+            if image is not None:
+                binary_mask = create_binary_mask(image, tuple(rgb_value))
 
-        with torch.no_grad():
-            output_mask = model(input_tensor)
+                binary_mask = cv2.resize(binary_mask, (512,256), interpolation=cv2.INTER_NEAREST)
 
-        # Resize the output mask to the original size
-        output_mask = torch.nn.functional.interpolate(output_mask, size=input_image.size[::-1], mode='bilinear', align_corners=False)
+                output_path = os.path.join(ground_truth_dir, filename)
+                cv2.imwrite(output_path, binary_mask)
 
-        output_mask_path = os.path.join(output_masks_folder, f"{image_name.split('.')[0]}.png")
+    print("Ground truth binary masks created successfully!")
 
-        # Post-process and save the output mask
-        output_mask = torch.clamp(output_mask, 0, 1)
-        output_array = (output_mask.squeeze().cpu().numpy() * 255).astype(np.uint8)
-        output_image = ToPILImage()(output_array)
-        output_image = output_image.convert('L')
-        output_image.save(output_mask_path)
 
-    except RuntimeError as e:
-        print(e)
-        # Skip to the next image in case of an exception
+if __name__ == '__main__':
+    if len(sys.argv) != 6:
+        print("Usage:# python inference.py path/to/model path/to/mapillaryImages path/to/mapillaryLabels OutputPath/to/binaryPredictions "
+              "OutputPath/to/groundTruth")
+        sys.exit(1)
 
-print("Inference completed. Predicted masks saved in:", output_masks_folder)
+    model_path = sys.argv[1]
+    mapillary_images = sys.argv[2]
+    mapillary_labels = sys.argv[3]
+    prediction_binary_dir = sys.argv[4]
+    ground_truth_dir = sys.argv[5]
+    rgb = [244, 35, 232]
+
+    model_output_folder = 'model_seg_OutputMasks'
+    os.makedirs(model_output_folder, exist_ok=True)
+
+    if not os.path.exists(prediction_binary_dir):
+        os.makedirs(prediction_binary_dir)
+
+    if not os.path.exists(ground_truth_dir):
+        os.makedirs(ground_truth_dir)
+
+    # Convert Mapillary Labels to Binary Images and store them in ground_truth_dir
+    # create_ground_truth_binary_mask(mapillary_labels, rgb)
+
+    '''Testing Phase:'''
+    model = SegmentationModel()
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model.load_state_dict(torch.load(model_path, map_location=torch.device(device)))
+    model.to(device)
+    model.eval()
+
+
+
+
+    test_image_files = [f for f in os.listdir(mapillary_images) if f.endswith('.jpg')]
+
+    transform = transforms.Compose([
+        transforms.Resize((256, 512)),
+        # transforms.RandomHorizontalFlip(p=1.0),
+        transforms.ToTensor(),
+        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+    ])
+
+    with torch.no_grad():
+        for image_file in test_image_files:
+            image_path = os.path.join(mapillary_images, image_file)
+            image = Image.open(image_path).convert('RGB')
+
+            image = transform(image).unsqueeze(0).to(device)
+            output = model(image.to(device))
+            outputx = output.detach().cpu()[0]
+            decoded_ouput = decode_segmap(torch.argmax(outputx, 0))
+            numpy_array = (decoded_ouput * 255).clip(0, 255).astype(np.uint8)
+            binary_mask = create_binary_mask(numpy_array, [244, 35, 232])
+            seg_output_image = Image.fromarray(numpy_array)
+            bin_output_image = Image.fromarray(binary_mask)
+            seg_output_image.save(os.path.join(model_output_folder, f"seg_mask_{image_file}"))
+            bin_output_image.save(os.path.join(prediction_binary_dir, f"{image_file.replace('.jpg', '.png')}"), format='PNG')
+
+
+    print("Segmentation masks saved in:", model_output_folder)
+    print("Binary masks saved in:", prediction_binary_dir)
