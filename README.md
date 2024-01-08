@@ -1,4 +1,4 @@
-# Image-Segmenation-on-CityScapes-dataset
+# Image-Segmentation-on-CityScapes-dataset
 This PyTorch project aims to train a SegmentationModel for image segmentation tasks using the CityScapes dataset, utilizing the DeepLabV3Plus architecture with a resnet34 encoder.
 
 `Step-1`
