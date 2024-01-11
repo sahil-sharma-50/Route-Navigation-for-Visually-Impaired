@@ -38,7 +38,7 @@ def compute_metrics(prediction_dir, ground_truth_dir):
         ground_truth_mask_flat = ground_truth_mask.ravel()
 
         ious.append(jaccard_score(ground_truth_mask_flat, prediction_mask_flat))
-        precisions.append(precision_score(ground_truth_mask_flat, prediction_mask_flat))
+        precisions.append(precision_score(ground_truth_mask_flat, prediction_mask_flat, zero_division=1))
         f1_scores.append(f1_score(ground_truth_mask_flat, prediction_mask_flat))
 
     return np.mean(ious), np.mean(precisions), np.mean(f1_scores)
