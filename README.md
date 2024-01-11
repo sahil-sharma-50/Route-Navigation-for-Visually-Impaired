@@ -12,10 +12,11 @@ You will need to register and download two files:
 Use these files to train your model. Additionally, you can find helpful scripts at [Cityscapes Scripts](https://github.com/mcordts/cityscapesScripts.git), which include tools to convert the `gtFine` folder into mask images suitable for training.
 
  `Step-2`
- `Install required tools:`
+ `Install dependencies:`
  ```sh
-  pip install segmentation-models-pytorch
+ pip install -r requirements.txt 
  ```
+
  `Step-3`
  `Download Mapillary Dataset`
  <br><br>
