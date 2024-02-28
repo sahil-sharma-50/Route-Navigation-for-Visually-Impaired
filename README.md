@@ -58,8 +58,13 @@ For example:
 
  `Output`:
  ```sh
-    This will print the Average IOU, Average Precision, and Average F1 score.
-    Average IOU: 0.9672
-    Average Precision: 0.9682
-    Average F1-score: 0.9828
+    Base Model metrics trained on Cityscapes dataset:
+    Average IOU: 0.0177
+    Average Precision: 0.5626
+    Average F1-score: 0.0314
+
+    Fine-Tuned Model metrics on Mapillary dataset:
+    Average IOU: 0.6889
+    Average Precision: 0.7522
+    Average F1-score: 0.7838
   ```
