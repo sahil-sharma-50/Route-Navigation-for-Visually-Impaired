@@ -77,7 +77,7 @@ This file will convert the testing images in grayscale imamges for fine tuned mo
   Logs for both models have been successfully written to model-IOU.txt.
 ```
 
-# How to Check Task: 9 [Final Task]:
+# How to Generate Output Video:
 `Step-0`
 
 `Download fine_tuned model: model.pt`
