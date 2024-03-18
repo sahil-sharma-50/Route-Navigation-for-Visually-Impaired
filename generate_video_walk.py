@@ -33,14 +33,16 @@ def process_gps_file(file_path):
                     gps_with_time.append(data)
 
     for i in range(1, len(gps_with_time)):
-        time_difference = gps_with_time[i]['time_seconds'] - gps_with_time[i - 1]['time_seconds']
+        time_difference = (
+            gps_with_time[i]["time_seconds"] - gps_with_time[i - 1]["time_seconds"]
+        )
         distance = haversine(
-            (gps_with_time[i - 1]['lat'], gps_with_time[i - 1]['lon']),
-            (gps_with_time[i]['lat'], gps_with_time[i]['lon']),
-            unit=Unit.KILOMETERS
+            (gps_with_time[i - 1]["lat"], gps_with_time[i - 1]["lon"]),
+            (gps_with_time[i]["lat"], gps_with_time[i]["lon"]),
+            unit=Unit.KILOMETERS,
         )
         speed_kph = distance / time_difference * 3600 if time_difference != 0 else 0
-        gps_with_time[i]['speed_kph'] = speed_kph
+        gps_with_time[i]["speed_kph"] = speed_kph
 
 
 def make_video(cap, text, time_wait, el_start_time, out):
@@ -56,9 +58,20 @@ def make_video(cap, text, time_wait, el_start_time, out):
             if display_time <= time_wait:
                 for i, line in enumerate(text):
                     y = 40 + i * 45
-                    cv2.putText(frame, line, (15, y), font, 1, (0, 0, 0), 2, cv2.LINE_AA)
+                    cv2.putText(
+                        frame, line, (15, y), font, 1, (0, 0, 0), 2, cv2.LINE_AA
+                    )
                 elapsed_time_str = f"Elapsed Time: {int(elapsed_time)}s"
-                cv2.putText(frame, elapsed_time_str, (15, 40 + len(text) * 45), font, 1, (0, 0, 0), 2, cv2.LINE_AA)
+                cv2.putText(
+                    frame,
+                    elapsed_time_str,
+                    (15, 40 + len(text) * 45),
+                    font,
+                    1,
+                    (0, 0, 0),
+                    2,
+                    cv2.LINE_AA,
+                )
                 out.write(frame)
                 cv2.imshow("Frame", frame)
             else:
@@ -79,10 +92,19 @@ def final_output(text, time_wait, cap, el_start_time, out):
             current_time = time.time()
             elapsed_time = current_time - el_start_time
             display_time = time.time() - curr_time
-            if display_time <= time_wait+5:
+            if display_time <= time_wait + 5:
                 cv2.putText(frame, text, (15, 40), font, 1, (0, 0, 0), 2, cv2.LINE_AA)
                 elapsed_time_str = f"Elapsed Time: {int(elapsed_time)}s"
-                cv2.putText(frame, elapsed_time_str, (15, 80), font, 1, (0, 0, 0), 2, cv2.LINE_AA)
+                cv2.putText(
+                    frame,
+                    elapsed_time_str,
+                    (15, 80),
+                    font,
+                    1,
+                    (0, 0, 0),
+                    2,
+                    cv2.LINE_AA,
+                )
                 out.write(frame)
                 cv2.imshow("Frame", frame)
             else:
@@ -102,7 +124,9 @@ def walk_command(instruction, time_takes, cap, elapsed_start_time, out):
         time_difference = 0
         if start_time <= current_walk_time <= (start_time + time_takes):
             if i > 0:
-                time_difference = (current_walk_time - gps_with_time[i - 1]["time_seconds"])
+                time_difference = (
+                    current_walk_time - gps_with_time[i - 1]["time_seconds"]
+                )
             text = (
                 f"{instruction}\n"
                 f"Stay center on the same street\n"
@@ -110,11 +134,11 @@ def walk_command(instruction, time_takes, cap, elapsed_start_time, out):
                 f"Time Takes: {time_takes}s\n"
             )
             try:
-                if walk['speed_kph'] > 0:
+                if walk["speed_kph"] > 0:
                     walking_speed = f"Walking Speed: {walk['speed_kph']:.2f} km/h"
                     text += walking_speed
                 else:
-                    walking_speed = f"Walking Speed: Not Walking km/h"
+                    walking_speed = "Walking Speed: Not Walking km/h"
                     text += walking_speed
             except KeyError:
                 pass
@@ -123,7 +147,15 @@ def walk_command(instruction, time_takes, cap, elapsed_start_time, out):
     start_time += time_takes
 
 
-def commands(type_input, instructions, final_instruction, time_takes, cap, elapsed_start_time, out):
+def commands(
+    type_input,
+    instructions,
+    final_instruction,
+    time_takes,
+    cap,
+    elapsed_start_time,
+    out,
+):
     """Process general instructions and call the appropriate function."""
     if type_input == 1:
         instruction = f"Walk: {instructions}"
@@ -157,9 +189,9 @@ def travel_in_api(trace_data, cap, elapsed_start_time, out):
                 ceil(trace_point["time"]),
                 cap,
                 elapsed_start_time,
-                out
+                out,
             )
-        except Exception as e:
+        except Exception:
             commands(
                 trace_point["type"],
                 trace_point["verbal_pre_transition_instruction"],
@@ -167,14 +199,16 @@ def travel_in_api(trace_data, cap, elapsed_start_time, out):
                 ceil(trace_point["time"]),
                 cap,
                 elapsed_start_time,
-                out
+                out,
             )
 
 
 def main():
     """Main function to start the video generation process."""
     if len(sys.argv) != 4:
-        print("Usage: python generate_video_walk.py <input_video_path> <output_video_path> <gps_coordinates_path>")
+        print(
+            "Usage: python generate_video_walk.py <input_video_path> <output_video_path> <gps_coordinates_path>"
+        )
         sys.exit(1)
 
     input_video_path = sys.argv[1]
@@ -199,17 +233,22 @@ def main():
     cap = cv2.VideoCapture(input_video_path)
     frame_width = int(cap.get(3))
     frame_height = int(cap.get(4))
-    out = cv2.VideoWriter(output_video_path+'output.avi', cv2.VideoWriter_fourcc("M", "J", "P", "G"), 24, (frame_width, frame_height))
+    out = cv2.VideoWriter(
+        output_video_path + "output.avi",
+        cv2.VideoWriter_fourcc("M", "J", "P", "G"),
+        24,
+        (frame_width, frame_height),
+    )
 
     elapsed_start_time = time.time()
-    print('Video is in Process......')
+    print("Video is in Process......")
     travel_in_api(trace_data, cap, elapsed_start_time, out)
 
     cap.release()
     out.release()
     cv2.destroyAllWindows()
 
-    print('Video Processed Successfully !!')
+    print("Video Processed Successfully !!")
 
 
 if __name__ == "__main__":
