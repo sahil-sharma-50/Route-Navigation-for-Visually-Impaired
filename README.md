@@ -43,7 +43,7 @@ https://faubox.rrze.uni-erlangen.de/getlink/fiASqeGMyqMPgwBTdMym6D/model.pt
 ```
 
 `convert_masks_to_grayscale.py`
-This file will convert the testing images in grayscale imamges for fine tuned model training.
+This file will convert the testing images to grayscale images for fine-tuned model training.
 ```sh
   python convert_masks_to_grayscale.py
 ```
@@ -111,15 +111,15 @@ This file will convert the testing images in grayscale imamges for fine tuned mo
 ```
 `For example 'Video':`
 ```sh
-  python rsu_vi.py Walk.mp4 sensation/input/gps_coordinates.gpx Output --model_path model.pt
+  python rsu_vi.py Walk.mp4 sensation/input/gps_coordinates.gpx Output --model_path model.onxx
 ```
 `For example 'Camera':`
 ```sh
-  python rsu_vi.py 0 sensation/input/gps_coordinates.gpx Output --model_path model.pt
+  python rsu_vi.py 0 sensation/input/gps_coordinates.gpx Output --model_path model.onxx
 ```
 `For example 'Images':`
 ```sh
-  python rsu_vi.py testing_images sensation/input/gps_coordinates.gpx Output --model_path model.pt
+  python rsu_vi.py testing_images sensation/input/gps_coordinates.gpx Output --model_path model.onxx
 ```
 
 `Output of 'Video', 'Camera', and 'Images' will be saved in:`
