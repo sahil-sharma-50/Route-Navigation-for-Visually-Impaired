@@ -25,7 +25,7 @@ Technical milestones that are completed in this project include:
 ```
 `2. Download ONNX model: model.onnx`
 ```sh
-  https://faubox.rrze.uni-erlangen.de/getlink/fiGoANX87yZcC2RL61PtU5/model.onnx
+  https://faubox.rrze.uni-erlangen.de/getlink/fi7jZsgKRuBMGFhpeuvNir/model.onnx
 ```
 
 `Step-1: Install dependencies`
