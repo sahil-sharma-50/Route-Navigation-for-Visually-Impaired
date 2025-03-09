@@ -12,15 +12,11 @@ def export_to_onnx(pytorch_model_path, onnx_model_path):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     state_dict = torch.load(pytorch_model_path, map_location=device)
     model = DeepLabV3PResNet34()
-    
     model.load_state_dict(state_dict)
-
     model.eval()
 
     # Adjust the dummy input to match the model's expected input size
-    dummy_input = torch.randn(
-        1, 3, 256, 512
-    )  # Adjusted for an image of height 256 and width 512
+    dummy_input = torch.randn(1, 3, 256, 512)
 
     # Export the model
     torch.onnx.export(
@@ -28,7 +24,6 @@ def export_to_onnx(pytorch_model_path, onnx_model_path):
         dummy_input,  # model input (or a tuple for multiple inputs)
         onnx_model_path,  # where to save the model (can be a file or file-like object)
         export_params=True,  # store the trained parameter weights inside the model file
-        
         do_constant_folding=True,  # whether to execute constant folding for optimization
         input_names=["input"],  # the model's input names
         output_names=["output"],  # the model's output names
@@ -42,18 +37,17 @@ def export_to_onnx(pytorch_model_path, onnx_model_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Export PyTorch model to ONNX format")
     parser.add_argument(
-        "--pytorch",
-        type=str,
-        default="model.pth",
-        help="Path to the PyTorch model file",
-    )
+                        "--pytorch",
+                        type=str,
+                        default="model.pth",
+                        help="Path to the PyTorch model file",
+                    )
     parser.add_argument(
-        "--onnx",
-        type=str,
-        default="model.onnx",
-        help="Path where the ONNX model will be stored",
-    )
+                        "--onnx",
+                        type=str,
+                        default="model.onnx",
+                        help="Path where the ONNX model will be stored",
+                    )
 
     args = parser.parse_args()
-
     export_to_onnx(args.pytorch, args.onnx)

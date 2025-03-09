@@ -1,9 +1,10 @@
 # File to compute IOU
-import numpy as np
 import os
-from sklearn.metrics import jaccard_score, precision_score, f1_score
-from skimage.io import imread
 import sys
+
+import numpy as np
+from skimage.io import imread
+from sklearn.metrics import f1_score, jaccard_score, precision_score
 
 
 def compute_metrics(prediction_dir, ground_truth_dir):
@@ -14,9 +15,7 @@ def compute_metrics(prediction_dir, ground_truth_dir):
     common_files = prediction_files.intersection(ground_truth_files)
 
     if len(common_files) == 0:
-        raise ValueError(
-            "No matching files found between prediction masks and ground truth masks."
-        )
+        raise ValueError("No matching files found between prediction masks and ground truth masks.")
 
     ious = []
     precisions = []
@@ -46,11 +45,11 @@ def compute_metrics(prediction_dir, ground_truth_dir):
         ious.append(
             jaccard_score(ground_truth_mask_flat, prediction_mask_flat, zero_division=1)
         )
+        
         precisions.append(
-            precision_score(
-                ground_truth_mask_flat, prediction_mask_flat, zero_division=1
-            )
+            precision_score(ground_truth_mask_flat, prediction_mask_flat, zero_division=1)
         )
+        
         f1_scores.append(
             f1_score(ground_truth_mask_flat, prediction_mask_flat, zero_division=1)
         )
@@ -61,9 +60,11 @@ def compute_metrics(prediction_dir, ground_truth_dir):
 if __name__ == "__main__":
     if len(sys.argv) != 4:
         print(
-            "Usage: python compute_metrics.py /path/to/base_mode_predictions /path/to/tuned_model_predictions"
-            "/path/to/ground_truths"
-        )
+                """Usage:   python compute_metrics.py 
+                        /path/to/base_mode_predictions 
+                        /path/to/tuned_model_predictions
+                        /path/to/ground_truths"""
+            )
         sys.exit(1)
 
     base_prediction_dir = sys.argv[1]
@@ -89,6 +90,8 @@ if __name__ == "__main__":
             print(f"Average IOU: {average_iou:.4f}")
             print(f"Average Precision: {average_precision:.4f}")
             print(f"Average F1-score: {average_f1:.4f}")
+
+
 
             sys.stdout = file
             # Fine-tuned metrics
