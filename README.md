@@ -66,7 +66,7 @@ Technical milestones that are completed in this project include:
 
 
 # Instructions to Run all Tasks (For training):
-Make sure you have `Mapillary-Vistas-1000-sidewalks` and `trainvaltest` folders in same directory.
+Make sure to download 'leftImg8bit_trainvaltest.zip' and 'gtFine_trainvaltest.zip' from the <a href="https://www.cityscapes-dataset.com/downloads/">Cityscapes Dataset</a> and <a href="https://www.mapillary.com/dataset/vistas">Mapillary-Vistas-Dataset</a> and `trainvaltest` folders in same directory.
 
 `Download base-model: base_model.pt`
 ```sh
@@ -90,26 +90,25 @@ This file will convert the testing images to grayscale images for fine-tuned mod
 
 `training_pipeline.py`
 ```sh
-  python training_pipeline.py
-
+  python model_training/training/mapillary_finetune.py
 ```
 
 `inference.py`
 ```sh
-'Usage:#' python inference.py path/to/model path/to/mapillaryImages path/to/mapillaryLabels OutputPath/to/ModelOutput OutputPath/to/binaryPredictions OutputPath/to/groundTruth 
+'Usage:#' python model_training/training/inference.py path/to/model path/to/mapillaryImages path/to/mapillaryLabels OutputPath/to/ModelOutput OutputPath/to/binaryPredictions OutputPath/to/groundTruth 
 ```
 `example: 1. For base model:`
 ```sh 
-  python inference.py base_model.pt Mapillary-Vistas-1000-sidewalks/testing/images Mapillary-Vistas-1000-sidewalks/testing/labels base_model_output base_Predictions groundTruth
+  python model_training/training/inference.py base_model.pt Mapillary-Vistas-1000-sidewalks/testing/images Mapillary-Vistas-1000-sidewalks/testing/labels base_model_output base_Predictions groundTruth
 ```
 `example: 2. For tuned model:`
 ```sh 
-  python inference.py fine_tuned_model.pt Mapillary-Vistas-1000-sidewalks/testing/images Mapillary-Vistas-1000-sidewalks/testing/labels tuned_model_output tuned_Predictions groundTruth
+  python model_training/training/inference.py fine_tuned_model.pt Mapillary-Vistas-1000-sidewalks/testing/images Mapillary-Vistas-1000-sidewalks/testing/labels tuned_model_output tuned_Predictions groundTruth
 ```
 
 `compute_IOU file:`
 ```sh
-  python compute_IOU.py base_Predictions tuned_Predictions groundTruth 
+  python eval/compute_IOU.py base_Predictions tuned_Predictions groundTruth 
 ```
 
 `Out-put`:
