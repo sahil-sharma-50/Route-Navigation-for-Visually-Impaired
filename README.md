@@ -16,6 +16,41 @@ Technical milestones that are completed in this project include:
 
 ------------------------------------------------------------------------------------------
 
+# Project Structure
+```
+├── README.md
+├── .gitignore
+├── requirements.txt
+├── rsu_vi.py
+├── eval/
+│   ├── computer_IOU.py
+│   └── convert_masks_to_grayscale.py
+├── mode_training/
+│   ├── model_core/
+│   │   ├── __init__.py
+│   │   ├── data.py
+│   │   ├── models.py
+│   │   ├── train_utils.py
+│   │   └── utils.py
+│   └── training/
+│       ├── cityscapes_train.py
+│       ├── inference.py
+│       └── mapillary_finetune.py
+├── model_weights/
+│   └── model.onnx
+└── sensation/
+    ├── class_colors.csv
+    ├── data_handler.py
+    ├── helper/
+    │   ├── onnx_export.py
+    │   └── segmentation.py
+    ├── input/
+    │   ├── FAU_box_link.txt
+    │   └── gps_coordinates.gpx
+    └── utils/
+        └── analyze.py
+```
+
 # How to Generate Output Video (with Route Instructions and Sidewalk Detection):
 `Step-0: Downloading Models`
 
