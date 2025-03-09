@@ -25,7 +25,7 @@ Technical milestones that are completed in this project include:
 ```
 `2. Download ONNX model: model.onnx`
 ```sh
-  https://faubox.rrze.uni-erlangen.de/getlink/fiGoANX87yZcC2RL61PtU5/model.onxx
+  https://faubox.rrze.uni-erlangen.de/getlink/fiGoANX87yZcC2RL61PtU5/model.onnx
 ```
 
 `Step-1: Install dependencies`
@@ -46,15 +46,15 @@ Technical milestones that are completed in this project include:
 ```
 `For example 'Video':`
 ```sh
-  python rsu_vi.py Walk.mp4 sensation/input/gps_coordinates.gpx Output --model_path model.onxx
+  python rsu_vi.py Walk.mp4 sensation/input/gps_coordinates.gpx Output --model_path model.onnx
 ```
 `For example 'Camera':`
 ```sh
-  python rsu_vi.py 0 sensation/input/gps_coordinates.gpx Output --model_path model.onxx
+  python rsu_vi.py 0 sensation/input/gps_coordinates.gpx Output --model_path model.onnx
 ```
 `For example 'Images':`
 ```sh
-  python rsu_vi.py testing_images sensation/input/gps_coordinates.gpx Output --model_path model.onxx
+  python rsu_vi.py testing_images sensation/input/gps_coordinates.gpx Output --model_path model.onnx
 ```
 
 `Output of 'Video', 'Camera', and 'Images' will be saved in:`
